@@ -1,5 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const formData = require("express-form-data");
+const os = require("os");
 const cors = require("cors");
 
 // Import routes
@@ -20,20 +22,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // simple route
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
-});
+const options = {
+  uploadDir: os.tmpdir(),
+  autoClean: true
+};
+
+app.use(formData.parse(options));
+app.use(formData.format());
+app.use(formData.union());
 
 // Sync models with the database
 const sequelizeDB = require("./config/db");
 sequelizeDB.sequelize.sync(sequelizeDB);
 
 // Use routes
-app.use("/v1", routes);
+app.use("/api", routes);
 
 
 // set port, listen for requests
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4200;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
